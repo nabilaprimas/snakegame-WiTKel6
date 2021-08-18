@@ -1,5 +1,5 @@
-# snakegame-WiTKel6
-Snake Game untuk Final Project Digitalent WiT oleh Kelompok 6
+# snakegame-WiTKel6 Kelas A
+Snake Game untuk Final Project Digitalent WiT oleh Kelompok 6 Kelas A
 
 Nama Kelompok :
 1. Nabila Primaswari Anggraini
