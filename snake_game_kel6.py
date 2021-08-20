@@ -5,6 +5,7 @@ import random
 
 SIZE = 20
 
+#Kelas untuk Apple, mengatur tampilan dan posisi apel
 class Apple:
     def __init__(self, parent_screen):
         self.parent_screen = parent_screen
@@ -19,7 +20,8 @@ class Apple:
     def move(self):
         self.x = random.randint(1,22)*SIZE
         self.y = random.randint(1,22)*SIZE
-
+        
+#Kelas untuk menu Start, menampilkan layar start
 class Start :
     def __init__(self, parent_screen):
         self.parent_screen = parent_screen
@@ -30,7 +32,8 @@ class Start :
     def drawstart(self):
         self.parent_screen.blit(self.bg_start, (self.x, self.y))
         pygame.display.flip()
-
+        
+#Kelas untuk Balok rintangan, mengatur tampilan dan posisi balok
 class Wall:
     def __init__(self, parent_screen):
         self.parent_screen = parent_screen
@@ -46,6 +49,7 @@ class Wall:
         self.xw = random.randint(1,22)*SIZE
         self.yw = random.randint(1,22)*SIZE
 
+#Kelas untuk mengatur Ular
 class Snake:
     def __init__(self, parent_screen):
         self.parent_screen = parent_screen
@@ -57,7 +61,8 @@ class Snake:
         self.length = 1
         self.x = [20]
         self.y = [20]
-
+    
+    #Fungsi untuk mengatur variabel yang menunjukkan status pergerakan ular
     def move_left(self):
         self.direction = 'LEFT'
 
@@ -69,7 +74,8 @@ class Snake:
 
     def move_down(self):
         self.direction = 'DOWN'
-
+    
+    #Fungsi untuk mengatur rotasi dari kepala ular agar sesuai dengan arah bergeraknya
     def rotate90(self):
         self.blockhead = pygame.transform.rotate(self.blockhead, 90)
         self.block = pygame.transform.rotate(self.block, 90)
@@ -77,7 +83,8 @@ class Snake:
     def rotate270(self):
         self.blockhead = pygame.transform.rotate(self.blockhead, 270)
         self.block = pygame.transform.rotate(self.block, 270)
-
+    
+    #Fungsi untuk pergerakan ular (ular berjalan ke arah tertentu)
     def walk(self):
         # update body
         for i in range(self.length-1,0,-1):
@@ -95,7 +102,8 @@ class Snake:
             self.y[0] += SIZE
 
         self.draw()
- 
+    
+    #Fungsi untuk mengatur tampilan ular saat ular bergerak
     def draw(self):  
         self.parent_screen.blit(self.bg_surface, (0,0))                                             
                                         
@@ -103,12 +111,14 @@ class Snake:
             self.parent_screen.blit(self.block, (self.x[i], self.y[i]))
         self.parent_screen.blit(self.blockhead, (self.x[0], self.y[0]))     
         pygame.display.flip()
-
+    
+    #Fungsi untuk menambah panjang ular
     def increase_length(self):
         self.length += 1
         self.x.append(-1)
         self.y.append(-1)
 
+#Kelas untuk menjalankan permainan secara keseluruhan
 class Game:    
     def __init__(self):
         pygame.init()        
@@ -122,28 +132,33 @@ class Game:
         self.starts.drawstart()
         pygame.mixer.init()       
         self.play_bg_music()
-
+    
+    #Fungsi untuk memainkan background music
     def play_bg_music(self):
         pygame.mixer.music.load("assets/bgmusic.mp3")  
         pygame.mixer.music.play(-1,0)
-
+    
+    #Fungsi untuk mengatur sound effect yang dimainkan saat ular makan atau menabrak
     def play_sound(self,sound_name):
         if sound_name == "crash":
             sound = pygame.mixer.Sound("assets/bghit.mp3")
         elif sound_name == "munch":
             sound = pygame.mixer.Sound("assets/bgmunch.mp3")
         pygame.mixer.Sound.play(sound)
-
+    
+    #Fungsi untuk reset
     def reset(self):
         self.snake = Snake(self.surface)
         self.apple = Apple(self.surface)
-
+    
+    #Fungsi untuk mengatur apabila ular menabrak objek tertentu
     def is_collision(self, x1, y1, x2, y2):
         if x1 >= x2 and x1 < x2 + SIZE:
             if y1 >= y2 and y1 < y2 + SIZE:
                 return True
         return False
-
+    
+    #Fungsi untuk memulai permainan, dimana pada fungsi ini memanggil fungsi-fungsi dari kelas lain
     def play(self):
         self.snake.walk()
         self.apple.draw()
@@ -151,34 +166,36 @@ class Game:
         self.display_score()
         pygame.display.flip()
 
-        # snake eating apple scenario
+        # Ular makan apel
         if self.is_collision(self.snake.x[0], self.snake.y[0], self.apple.x, self.apple.y):
             self.play_sound("munch")
             self.snake.increase_length()
             self.apple.move()
             self.wall.move()
 
-        #snake hit wall
+        # Ular memakan balok/menabrak balok
         if self.is_collision(self.snake.x[0], self.snake.y[0], self.wall.xw, self.wall.yw):
             self.play_sound("crash")
             raise "Collision Occured"
 
-        # snake colliding with itself
+        # Ular memakan badannya sendiri
         for i in range(2, self.snake.length):
             if self.is_collision(self.snake.x[0], self.snake.y[0], self.snake.x[i], self.snake.y[i]):
                 self.play_sound("munch")
                 raise "Collision Occured"
 
-        #snake hit the edge of the screen
+        # Ular menabrak tepian layar permainan
         if self.snake.x[0] >= 720 or self.snake.x[0] < 0 or self.snake.y[0] >= 480 or self.snake.y[0] < 0:
             self.play_sound("crash")
             raise "Collision Occured"
-
+    
+    #Fungsi untuk menampilkan skor pada pinggiran/pojok layar secara real time
     def display_score(self):
         game_font = pygame.font.Font('assets/Pixellari.ttf',30)
         score = game_font.render(f"Score: {self.snake.length-1}",True,(255,255,255))
         self.surface.blit(score,(10,10))
-
+    
+    #Fungsi untuk menampilkan skor saat game over, memberhentikan musik saat game over
     def show_game_over(self):
         self.bg_gameover = pygame.image.load('assets/bg_gameover.png').convert()
         self.surface.blit(self.bg_gameover, (0,0))
@@ -189,7 +206,8 @@ class Game:
         self.surface.blit(line2, (35, 230))
         pygame.mixer.music.stop()
         pygame.display.flip()        
-
+    
+    #Fungsi untuk mengatur pergerakan ular saat permainan
     def run(self):                         
         while True:
             for event in pygame.event.get():
@@ -206,7 +224,8 @@ class Game:
                                 if event.key == K_RETURN:
                                     pygame.mixer.music.play(-1,0)
                                     pause = False
-
+                                
+                                #Pergerakan ular diatur oleh input panah di keyboard
                                 if self.snake.direction == 'RIGHT':
                                     if event.key == K_RIGHT:
                                         self.snake.move_right()
@@ -250,6 +269,7 @@ class Game:
                             elif event.type == QUIT:
                                 exit()
 
+                        #Exception untuk game over
                         try:
                             if not pause:
                                 self.play()
@@ -259,6 +279,7 @@ class Game:
                             pause = True
                             self.reset()
 
+                        #Fungsi untuk mengatur pergerakan ular (diatur oleh clock) dimana pegerakan ular semakin cepat apabila mencapai skor tertentu
                         if self.snake.length-1 <= 7:
                             time.sleep(.2)
                         elif self.snake.length-1 > 7 and self.snake.length-1 <= 15:
